@@ -80,7 +80,7 @@
         
         async function fetchData() {
             try {
-                const response = await fetch(URL);
+                const response = await fetch(URL, { redirect: 'follow' });
                 const data = await response.json();
                 
                 let html = '';
