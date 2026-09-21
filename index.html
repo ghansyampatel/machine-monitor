@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Machine Monitor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { 
+            font-family: Arial; 
+            background: #000; 
+            color: #fff; 
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 { color: #0ff; font-size: 24px; }
+        .status-bar { 
+            font-size: 24px; 
+            margin: 20px; 
+            font-weight: bold;
+        }
+        .on { color: #0f0; }
+        .off { color: #f00; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .machine {
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #555;
+        }
+        .machine.on-state { border-color: #0f0; }
+        .machine.off-state { border-color: #f00; }
+        .machine h2 { 
+            font-size: 36px; 
+            margin: 10px 0; 
+        }
+        .machine p {
+            font-size: 20px;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        .machine small {
+            color: #aaa;
+            font-size: 12px;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 18px;
+            background: #0ff;
+            border: none;
+            border-radius: 8px;
+            margin: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #lastUpdate { color: #888; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h1>MACHINE MONITOR</h1>
+    
+    <div class="status-bar">
+        <span class="on">ON: <span id="onCount">0</span></span>
+        &nbsp;|&nbsp;
+        <span class="off">OFF: <span id="offCount">0</span></span>
+    </div>
+    
+    <div class="grid" id="machines">Loading...</div>
+    
+    <button onclick="fetchData()">REFRESH</button>
+    <p id="lastUpdate"></p>
+
+    <script>
+        const URL = 'https://script.google.com/macros/s/AKfycbzeGonB8R1wmRZsnnn5JQlIY5hTPPd3k4achUFJfzKgTE1WQz3oNU9wdgVrqDs1AVihoA/exec?t=1';
+        
+        async function fetchData() {
+            try {
+                const response = await fetch(URL);
+                const data = await response.json();
+                
+                let html = '';
+                let on = 0, off = 0;
+                
+                data.forEach(m => {
+                    if (m.status === 'ON') on++;
+                    else off++;
+                    
+                    const cls = m.status === 'ON' ? 'on-state' : 'off-state';
+                    html += '<div class="machine ' + cls + '">' +
+                        '<h2>' + m.machine + '</h2>' +
+                        '<p class="' + m.status.toLowerCase() + '">' + m.status + '</p>' +
+                        '<small>' + m.time + '</small>' +
+                        '</div>';
+                });
+                
+                document.getElementById('onCount').textContent = on;
+                document.getElementById('offCount').textContent = off;
+                document.getElementById('machines').innerHTML = html;
+                document.getElementById('lastUpdate').textContent = 
+                    'Last Update: ' + new Date().toLocaleTimeString();
+                    
+            } catch (error) {
+                document.getElementById('lastUpdate').textContent = 
+                    'Error: ' + error.message;
+            }
+        }
+        
+        fetchData();
+        setInterval(fetchData, 15000);
+    </script>
+</body>
+</html>
