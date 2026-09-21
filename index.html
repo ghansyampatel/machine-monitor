@@ -12,7 +12,7 @@
             padding: 20px;
             margin: 0;
         }
-        h1 { color: #0ff; font-size: 24px; }
+        h1 { color: #0ff; font-size: 24px; margin: 10px 0; }
         .status-bar { 
             font-size: 24px; 
             margin: 20px; 
@@ -29,7 +29,7 @@
         }
         .machine {
             background: #333;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             border: 2px solid #555;
         }
@@ -37,7 +37,7 @@
         .machine.off-state { border-color: #f00; }
         .machine h2 { 
             font-size: 36px; 
-            margin: 10px 0; 
+            margin: 5px 0; 
         }
         .machine p {
             font-size: 20px;
@@ -47,6 +47,42 @@
         .machine small {
             color: #aaa;
             font-size: 12px;
+        }
+        .efficiency-box {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #555;
+        }
+        .efficiency-label {
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+        .efficiency-bar {
+            width: 100%;
+            height: 10px;
+            background: #444;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        .efficiency-fill {
+            height: 100%;
+            transition: width 0.5s;
+            border-radius: 5px;
+        }
+        .eff-high { background: linear-gradient(90deg, #0f0, #0a0); }
+        .eff-mid  { background: linear-gradient(90deg, #ff0, #fa0); }
+        .eff-low  { background: linear-gradient(90deg, #f00, #a00); }
+        .efficiency-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .time-detail {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 5px;
         }
         button {
             padding: 15px 40px;
@@ -76,13 +112,12 @@
     <p id="lastUpdate"></p>
 
     <script>
-        const URL = 'https://script.google.com/macros/s/AKfycbw9dizjkgnNlKGxfcYcHOhOkkEKtvjIE8jXejGYiosfKUmWxYt7EgZiQ6Dm4fYYEZLbJg/exec';
+        const URL = 'https://script.google.com/macros/s/AKfycbzeGonB8R1wmRZsnnn5JQlIY5hTPPd3k4achUFJfzKgTE1WQz3oNU9wdgVrqDs1AVihoA/exec';
         
-        async function fetchData() {
-            try {
-                const response = await fetch(URL, { redirect: 'follow' });
-                const data = await response.json();
-                
+        function fetchData() {
+            const callbackName = 'jsonpCb_' + Date.now();
+            
+            window[callbackName] = function(data) {
                 let html = '';
                 let on = 0, off = 0;
                 
@@ -91,10 +126,28 @@
                     else off++;
                     
                     const cls = m.status === 'ON' ? 'on-state' : 'off-state';
+                    
+                    let effClass = 'eff-low';
+                    if (m.efficiency >= 80) effClass = 'eff-high';
+                    else if (m.efficiency >= 50) effClass = 'eff-mid';
+                    
                     html += '<div class="machine ' + cls + '">' +
                         '<h2>' + m.machine + '</h2>' +
                         '<p class="' + m.status.toLowerCase() + '">' + m.status + '</p>' +
                         '<small>' + m.time + '</small>' +
+                        '<div class="efficiency-box">' +
+                            '<div class="efficiency-label">Efficiency: ' +
+                                '<span class="efficiency-value">' + m.efficiency + '%</span>' +
+                            '</div>' +
+                            '<div class="efficiency-bar">' +
+                                '<div class="efficiency-fill ' + effClass + '" style="width:' + m.efficiency + '%"></div>' +
+                            '</div>' +
+                            '<div class="time-detail">' +
+                                'ON: ' + m.onTime.toFixed(1) + ' min | ' +
+                                'OFF: ' + m.offTime.toFixed(1) + ' min | ' +
+                                'Count: ' + m.onCount +
+                            '</div>' +
+                        '</div>' +
                         '</div>';
                 });
                 
@@ -103,11 +156,14 @@
                 document.getElementById('machines').innerHTML = html;
                 document.getElementById('lastUpdate').textContent = 
                     'Last Update: ' + new Date().toLocaleTimeString();
-                    
-            } catch (error) {
-                document.getElementById('lastUpdate').textContent = 
-                    'Error: ' + error.message;
-            }
+                
+                delete window[callbackName];
+                if (script.parentNode) script.parentNode.removeChild(script);
+            };
+            
+            const script = document.createElement('script');
+            script.src = URL + '&callback=' + callbackName;
+            document.body.appendChild(script);
         }
         
         fetchData();
