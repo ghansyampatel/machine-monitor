@@ -2,130 +2,268 @@
 <html>
 <head>
     <title>Machine Monitor</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
     <style>
-        body { 
-            font-family: Arial; 
-            background: #000; 
-            color: #fff; 
-            text-align: center;
-            padding: 10px;
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
         }
-        h1 { color: #0ff; font-size: 20px; margin: 8px 0; }
-        .status-bar { 
-            font-size: 20px; 
-            margin: 12px; 
+        
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: clamp(5px, 2vw, 20px);
+        }
+        
+        h1 {
+            color: #0ff;
+            font-size: clamp(16px, 4vw, 28px);
+            margin: clamp(5px, 1vh, 15px) 0;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        
+        .status-bar {
+            font-size: clamp(14px, 3.5vw, 24px);
+            margin: clamp(5px, 1vh, 15px) 0;
             font-weight: bold;
+            text-align: center;
         }
+        
         .on { color: #0f0; }
         .off { color: #f00; }
         
-        /* ✅ 3 boxes in one line */
+        /* ✅ Universal Grid: सभी resolutions के लिए */
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            max-width: 600px;
+            gap: clamp(4px, 1vw, 10px);
+            width: 100%;
+            max-width: min(95vw, 800px);
             margin: 0 auto;
         }
         
         /* ✅ Small box size */
         .machine {
             background: #333;
-            padding: 10px;
-            border-radius: 8px;
+            padding: clamp(5px, 1.5vw, 12px);
+            border-radius: clamp(4px, 1vw, 10px);
             border: 2px solid #555;
-            transition: border-color 0.3s;
-        }
-        .machine.on-state { 
-            border-color: #0f0; 
-            box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
-        }
-        .machine.off-state { 
-            border-color: #f00; 
-            box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: clamp(70px, 14vw, 120px);
         }
         
-        /* ✅ Small text */
-        .machine h2 { 
-            font-size: 24px; 
-            margin: 3px 0; 
+        .machine.on-state {
+            border-color: #0f0;
+            box-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
         }
-        .machine p {
-            font-size: 16px;
-            margin: 3px 0;
+        
+        .machine.off-state {
+            border-color: #f00;
+            box-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+        }
+        
+        /* ✅ Small responsive text */
+        .machine h2 {
+            font-size: clamp(14px, 3.5vw, 24px);
+            margin: 2px 0;
             font-weight: bold;
         }
-        .machine.on-state p { color: #0f0; }
-        .machine.off-state p { color: #f00; }
-        .machine small {
-            color: #aaa;
-            font-size: 10px;
+        
+        .machine .status {
+            font-size: clamp(11px, 2.5vw, 16px);
+            margin: 2px 0;
+            font-weight: bold;
         }
         
-        /* ✅ Small efficiency box */
+        .machine.on-state .status { color: #0f0; }
+        .machine.off-state .status { color: #f00; }
+        
+        .machine .time {
+            color: #aaa;
+            font-size: clamp(8px, 2vw, 11px);
+            margin: 2px 0;
+        }
+        
+        .machine .date {
+            color: #888;
+            font-size: clamp(7px, 1.8vw, 10px);
+            margin: 1px 0;
+        }
+        
+        /* ✅ Efficiency */
         .efficiency-box {
-            margin-top: 8px;
-            padding-top: 6px;
+            width: 100%;
+            margin-top: clamp(3px, 1vw, 8px);
+            padding-top: clamp(3px, 1vw, 6px);
             border-top: 1px solid #555;
         }
+        
         .efficiency-label {
-            font-size: 11px;
+            font-size: clamp(9px, 2vw, 12px);
             color: #ccc;
             margin-bottom: 3px;
+            text-align: center;
         }
-        .efficiency-bar {
-            width: 100%;
-            height: 6px;
-            background: #444;
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 3px 0;
-        }
-        .efficiency-fill {
-            height: 100%;
-            transition: width 0.5s;
-            border-radius: 3px;
-        }
-        .eff-high { background: linear-gradient(90deg, #0f0, #0a0); }
-        .eff-mid  { background: linear-gradient(90deg, #ff0, #fa0); }
-        .eff-low  { background: linear-gradient(90deg, #f00, #a00); }
+        
         .efficiency-value {
-            font-size: 14px;
+            font-size: clamp(11px, 2.5vw, 16px);
             font-weight: bold;
             color: #fff;
         }
-        .time-detail {
-            font-size: 9px;
-            color: #aaa;
-            margin-top: 3px;
+        
+        .efficiency-bar {
+            width: 100%;
+            height: clamp(4px, 1vw, 8px);
+            background: #444;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 3px 0;
         }
         
-        button {
-            padding: 10px 30px;
-            font-size: 16px;
+        .efficiency-fill {
+            height: 100%;
+            transition: width 0.5s;
+            border-radius: 4px;
+        }
+        
+        .eff-high { background: linear-gradient(90deg, #0f0, #0a0); }
+        .eff-mid  { background: linear-gradient(90deg, #ff0, #fa0); }
+        .eff-low  { background: linear-gradient(90deg, #f00, #a00); }
+        
+        .time-detail {
+            font-size: clamp(7px, 1.6vw, 10px);
+            color: #aaa;
+            margin-top: 2px;
+            text-align: center;
+        }
+        
+        /* ✅ 12 Buttons in Horizontal Line */
+        .buttons-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: clamp(3px, 1vw, 8px);
+            width: 100%;
+            max-width: min(95vw, 800px);
+            margin: clamp(8px, 2vh, 20px) auto;
+        }
+        
+        .btn {
+            padding: clamp(6px, 1.5vw, 12px) clamp(4px, 1vw, 10px);
+            font-size: clamp(10px, 2vw, 14px);
             background: #0ff;
+            color: #000;
             border: none;
-            border-radius: 6px;
-            margin: 15px;
+            border-radius: clamp(4px, 1vw, 8px);
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.2s;
+            text-align: center;
         }
-        #lastUpdate { color: #888; font-size: 12px; }
         
-        /* ✅ Mobile पर 2 columns (small screen) */
-        @media (max-width: 500px) {
+        .btn:hover, .btn:active {
+            background: #0aa;
+            transform: scale(0.95);
+        }
+        
+        .btn.refresh {
+            background: #0f0;
+            color: #000;
+        }
+        
+        #lastUpdate {
+            color: #888;
+            font-size: clamp(10px, 2vw, 14px);
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        /* ✅ Mobile portrait (small phones) */
+        @media (max-width: 480px) {
             .grid {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 6px;
+            }
+            .buttons-row {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        /* ✅ Tablet */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .buttons-row {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        /* ✅ Desktop */
+        @media (min-width: 769px) {
+            .grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .buttons-row {
+                grid-template-columns: repeat(12, 1fr);
+            }
+        }
+        
+        /* ✅ Landscape mode */
+        @media (orientation: landscape) and (max-height: 500px) {
+            body {
+                padding: 5px;
+            }
+            h1 {
+                font-size: 16px;
+                margin: 3px 0;
+            }
+            .status-bar {
+                font-size: 14px;
+                margin: 3px 0;
             }
             .machine {
-                padding: 8px;
+                min-height: 60px;
             }
-            .machine h2 { font-size: 20px; }
-            .machine p { font-size: 14px; }
-            .efficiency-value { font-size: 12px; }
+        }
+        
+        /* ✅ Small Screen */
+        @media (max-width: 360px) {
+            .machine h2 {
+                font-size: 14px;
+            }
+            .machine .status {
+                font-size: 10px;
+            }
+            .machine .time {
+                font-size: 8px;
+            }
+        }
+        
+        /* ✅ Large Screen */
+        @media (min-width: 1200px) {
+            .grid {
+                max-width: 900px;
+            }
+            .buttons-row {
+                max-width: 900px;
+            }
         }
     </style>
 </head>
@@ -140,55 +278,34 @@
     
     <div class="grid" id="machines">Loading...</div>
     
-    <button onclick="fetchData()">REFRESH</button>
+    <!-- ✅ 12 Buttons in Horizontal Line -->
+    <div class="buttons-row" id="buttonRow">
+        <button class="btn" onclick="filterMachine('M1')">M1</button>
+        <button class="btn" onclick="filterMachine('M2')">M2</button>
+        <button class="btn" onclick="filterMachine('M3')">M3</button>
+        <button class="btn" onclick="filterMachine('M4')">M4</button>
+        <button class="btn" onclick="filterMachine('M5')">M5</button>
+        <button class="btn" onclick="filterMachine('M6')">M6</button>
+        <button class="btn" onclick="filterMachine('M7')">M7</button>
+        <button class="btn" onclick="filterMachine('M8')">M8</button>
+        <button class="btn" onclick="filterMachine('M9')">M9</button>
+        <button class="btn" onclick="filterMachine('M10')">M10</button>
+        <button class="btn" onclick="filterMachine('M11')">M11</button>
+        <button class="btn refresh" onclick="fetchData()">↻</button>
+    </div>
+    
     <p id="lastUpdate"></p>
 
     <script>
         const URL = 'https://script.google.com/macros/s/AKfycbxHQAN5FIVUJt9xrlEhibUNk1yLLrMdiSmIEp3Sruo2yvy-FHu6_t1a3X30yOrw2QzuaA/exec';
+        let allData = [];
         
         function fetchData() {
             const callbackName = 'jsonpCb_' + Date.now();
             
             window[callbackName] = function(data) {
-                let html = '';
-                let on = 0, off = 0;
-                
-                data.forEach(m => {
-                    if (m.status === 'ON') on++;
-                    else off++;
-                    
-                    const cls = m.status === 'ON' ? 'on-state' : 'off-state';
-                    
-                    // Efficiency class
-                    let effClass = 'eff-low';
-                    if (m.efficiency >= 80) effClass = 'eff-high';
-                    else if (m.efficiency >= 50) effClass = 'eff-mid';
-                    
-                    // ✅ ON/OFF color + Efficiency % दोनों
-                    html += '<div class="machine ' + cls + '">' +
-                        '<h2>' + m.machine + '</h2>' +
-                        '<p>' + m.status + '</p>' +
-                        '<small>' + m.time + '</small>' +
-                        '<div class="efficiency-box">' +
-                            '<div class="efficiency-label">Eff: ' +
-                                '<span class="efficiency-value">' + m.efficiency + '%</span>' +
-                            '</div>' +
-                            '<div class="efficiency-bar">' +
-                                '<div class="efficiency-fill ' + effClass + '" style="width:' + m.efficiency + '%"></div>' +
-                            '</div>' +
-                            '<div class="time-detail">' +
-                                'ON: ' + m.onTime.toFixed(0) + 'm | ' +
-                                'OFF: ' + m.offTime.toFixed(0) + 'm' +
-                            '</div>' +
-                        '</div>' +
-                        '</div>';
-                });
-                
-                document.getElementById('onCount').textContent = on;
-                document.getElementById('offCount').textContent = off;
-                document.getElementById('machines').innerHTML = html;
-                document.getElementById('lastUpdate').textContent = 
-                    'Last Update: ' + new Date().toLocaleTimeString();
+                allData = data;
+                renderData(data);
                 
                 delete window[callbackName];
                 if (script.parentNode) script.parentNode.removeChild(script);
@@ -199,7 +316,129 @@
             document.body.appendChild(script);
         }
         
+        function renderData(data) {
+            let html = '';
+            let on = 0, off = 0;
+            
+            data.forEach(m => {
+                if (m.status === 'ON') on++;
+                else off++;
+                
+                const cls = m.status === 'ON' ? 'on-state' : 'off-state';
+                
+                let effClass = 'eff-low';
+                if (m.efficiency >= 80) effClass = 'eff-high';
+                else if (m.efficiency >= 50) effClass = 'eff-mid';
+                
+                // ✅ DD/MM/YYYY format
+                let dateStr = '';
+                let timeStr = m.time || '';
+                
+                if (m.date) {
+                    // अगर date field है
+                    dateStr = m.date;
+                } else if (m.time) {
+                    // अगर सिर्फ time field है
+                    const today = new Date();
+                    const day = String(today.getDate()).padStart(2, '0');
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const year = today.getFullYear();
+                    dateStr = day + '/' + month + '/' + year;
+                }
+                
+                html += '<div class="machine ' + cls + '">' +
+                    '<h2>' + m.machine + '</h2>' +
+                    '<div class="status">' + m.status + '</div>' +
+                    '<div class="time">' + timeStr + '</div>' +
+                    '<div class="date">' + dateStr + '</div>' +
+                    '<div class="efficiency-box">' +
+                        '<div class="efficiency-label">Eff: ' +
+                            '<span class="efficiency-value">' + m.efficiency + '%</span>' +
+                        '</div>' +
+                        '<div class="efficiency-bar">' +
+                            '<div class="efficiency-fill ' + effClass + '" style="width:' + m.efficiency + '%"></div>' +
+                        '</div>' +
+                        '<div class="time-detail">' +
+                            'ON:' + Math.round(m.onTime) + 'm | ' +
+                            'OFF:' + Math.round(m.offTime) + 'm' +
+                        '</div>' +
+                    '</div>' +
+                    '</div>';
+            });
+            
+            document.getElementById('onCount').textContent = on;
+            document.getElementById('offCount').textContent = off;
+            document.getElementById('machines').innerHTML = html;
+            document.getElementById('lastUpdate').textContent = 
+                'Last Update: ' + new Date().toLocaleString('en-IN');
+        }
+        
+        function filterMachine(machineName) {
+            // Filter: सिर्फ उस machine को highlight करें
+            const filtered = allData.map(m => {
+                if (m.machine === machineName) {
+                    return { ...m, highlight: true };
+                }
+                return m;
+            });
+            
+            // सभी boxes render करें, लेकिन selected को border bold
+            let html = '';
+            let on = 0, off = 0;
+            
+            allData.forEach(m => {
+                if (m.status === 'ON') on++;
+                else off++;
+                
+                const cls = m.status === 'ON' ? 'on-state' : 'off-state';
+                const isSelected = m.machine === machineName;
+                
+                let effClass = 'eff-low';
+                if (m.efficiency >= 80) effClass = 'eff-high';
+                else if (m.efficiency >= 50) effClass = 'eff-mid';
+                
+                let dateStr = '';
+                let timeStr = m.time || '';
+                
+                if (m.date) {
+                    dateStr = m.date;
+                } else if (m.time) {
+                    const today = new Date();
+                    const day = String(today.getDate()).padStart(2, '0');
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const year = today.getFullYear();
+                    dateStr = day + '/' + month + '/' + year;
+                }
+                
+                const selectedStyle = isSelected ? 'style="border-width: 4px; border-color: #ff0; box-shadow: 0 0 15px #ff0;"' : '';
+                
+                html += '<div class="machine ' + cls + '" ' + selectedStyle + '>' +
+                    '<h2>' + m.machine + '</h2>' +
+                    '<div class="status">' + m.status + '</div>' +
+                    '<div class="time">' + timeStr + '</div>' +
+                    '<div class="date">' + dateStr + '</div>' +
+                    '<div class="efficiency-box">' +
+                        '<div class="efficiency-label">Eff: ' +
+                            '<span class="efficiency-value">' + m.efficiency + '%</span>' +
+                        '</div>' +
+                        '<div class="efficiency-bar">' +
+                            '<div class="efficiency-fill ' + effClass + '" style="width:' + m.efficiency + '%"></div>' +
+                        '</div>' +
+                        '<div class="time-detail">' +
+                            'ON:' + Math.round(m.onTime) + 'm | ' +
+                            'OFF:' + Math.round(m.offTime) + 'm' +
+                        '</div>' +
+                    '</div>' +
+                    '</div>';
+            });
+            
+            document.getElementById('machines').innerHTML = html;
+        }
+        
+        // Initial load
         fetchData();
+        
+        // Auto refresh every 15 seconds
         setInterval(fetchData, 15000);
     </script>
 </body>
