@@ -291,28 +291,50 @@
         <button class="btn" onclick="filterMachine('M9')">M9</button>
         <button class="btn" onclick="filterMachine('M10')">M10</button>
         <button class="btn" onclick="filterMachine('M11')">M11</button>
+        <button class="btn" onclick="filterMachine('M12')">M12</button>
         <button class="btn refresh" onclick="fetchData()">↻</button>
     </div>
     
     <p id="lastUpdate"></p>
 
     <script>
+        // Apps Script Web App URL: must be the SAME URL as SCRIPT_URL in the ESP32 code
         const URL = 'https://script.google.com/macros/s/AKfycbxKZkEYpQu6lrV4-NZbHnnXC3fXlkgZUihNAZMXMlTTZOKeoDQNKXe2HN43fVym-YcKgw/exec';
         let allData = [];
         
+        function showError(msg) {
+            document.getElementById('lastUpdate').textContent = '⚠ ' + msg;
+        }
+        
         function fetchData() {
             const callbackName = 'jsonpCb_' + Date.now();
-            
-            window[callbackName] = function(data) {
-                allData = data;
-                renderData(data);
-                
+            const script = document.createElement('script');
+            const cleanup = function() {
+                clearTimeout(timer);
                 delete window[callbackName];
                 if (script.parentNode) script.parentNode.removeChild(script);
             };
+            // No answer in 20 s: wrong URL, old deployment or no access
+            const timer = setTimeout(function() {
+                cleanup();
+                showError('No data from Apps Script (check URL / deployment access "Anyone")');
+            }, 20000);
             
-            const script = document.createElement('script');
-            script.src = URL + '?callback=' + callbackName;
+            window[callbackName] = function(data) {
+                cleanup();
+                if (!Array.isArray(data)) {
+                    showError('Apps Script error: ' + JSON.stringify(data));
+                    return;
+                }
+                allData = data;
+                renderData(data);
+            };
+            
+            script.onerror = function() {
+                cleanup();
+                showError('Cannot load Apps Script URL (check URL / deployment access "Anyone")');
+            };
+            script.src = URL + '?callback=' + callbackName + '&t=' + Date.now();
             document.body.appendChild(script);
         }
         
