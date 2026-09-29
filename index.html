@@ -5,281 +5,326 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
         html, body {
             width: 100%;
-            min-height: 100vh;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
             background: #000;
             color: #fff;
             font-family: Arial, sans-serif;
-            overflow-x: hidden;
             -webkit-text-size-adjust: 100%;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
         }
         
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: clamp(5px, 2vw, 20px);
+            padding: 2px;
         }
         
+        /* HEADER */
         h1 {
             color: #0ff;
-            font-size: clamp(16px, 4vw, 28px);
-            margin: clamp(5px, 1vh, 15px) 0;
+            font-size: clamp(11px, 3vw, 16px);
+            margin: 2px 0;
             text-align: center;
             letter-spacing: 1px;
+            flex-shrink: 0;
         }
         
         .status-bar {
-            font-size: clamp(14px, 3.5vw, 24px);
-            margin: clamp(5px, 1vh, 15px) 0;
+            font-size: clamp(10px, 2.5vw, 14px);
+            margin: 2px 0;
             font-weight: bold;
             text-align: center;
+            flex-shrink: 0;
         }
         
         .on { color: #0f0; }
         .off { color: #f00; }
         
-        /* ✅ Universal Grid: सभी resolutions के लिए */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: clamp(8px, 1.8vw, 16px);
-            width: 100%;
-            max-width: min(95vw, 800px);
-            margin: 0 auto;
-        }
-        
-        /* ✅ Small box size */
-        .machine {
-            background: #333;
-            padding: clamp(5px, 1.5vw, 12px);
-            border-radius: clamp(4px, 1vw, 10px);
-            border: 2px solid #555;
-            transition: all 0.3s;
+        /* PART NAV */
+        .part-nav {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: clamp(70px, 14vw, 120px);
-        }
-        
-        /* Whole tab = ONE solid colour from efficiency (like a share market tile)
-           green >= 80%, yellow 50-79%, red < 50% */
-        .machine.glow-high { --eff: 22, 160, 60; }
-        .machine.glow-mid  { --eff: 214, 150, 0; }
-        .machine.glow-low  { --eff: 205, 35, 35; }
-        
-        .machine {
-            background: rgb(var(--eff, 70, 70, 70));
-            border: 3px solid #000;
-            /* Ring outside the tab = ON (green) / OFF (red), separated by a black line */
-            box-shadow: 0 0 0 3px var(--state, #888), 0 0 14px var(--state, #888);
-        }
-        
-        .machine.on-state    { --state: #0f0; }
-        .machine.off-state   { --state: #f00; }
-        .machine.nosig-state { --state: #999; }
-        
-        /* Selected machine (buttons below) */
-        .machine.selected {
-            outline: 3px solid #ff0;
-            outline-offset: 5px;
-        }
-        
-        /* ✅ Small responsive text */
-        .machine h2 {
-            color: #fff;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
-            font-size: clamp(14px, 3.5vw, 24px);
+            gap: clamp(4px, 1vw, 8px);
             margin: 2px 0;
-            font-weight: bold;
+            flex-shrink: 0;
         }
         
-        /* ON / OFF written inside, in a dark badge so it reads on every colour */
-        .machine .status {
-            display: inline-block;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 12px;
-            padding: 1px 12px;
-            font-size: clamp(12px, 2.8vw, 18px);
-            margin: 2px 0;
+        .arrow-btn {
+            background: none;
+            border: none;
+            color: #ff0;
+            font-size: clamp(16px, 4vw, 24px);
+            cursor: pointer;
+            padding: 1px 6px;
+            line-height: 1;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .arrow-btn:hover { transform: scale(1.15); color: #fff; }
+        .arrow-btn:active { transform: scale(0.95); }
+        .arrow-btn:disabled { color: #555; cursor: not-allowed; transform: none; }
+        
+        .part-box {
+            border: 2px solid #ff0;
+            border-radius: 6px;
+            padding: 2px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            background: #111;
+        }
+        
+        .part-name {
+            color: #ff0;
+            font-size: clamp(11px, 2.8vw, 15px);
             font-weight: bold;
             letter-spacing: 1px;
         }
         
-        .machine.on-state .status    { color: #0f0; }
-        .machine.off-state .status   { color: #f44; }
-        .machine.nosig-state .status { color: #ccc; font-size: clamp(9px, 2vw, 13px); }
-        
-        .machine .time {
-            color: #fff;
-            font-size: clamp(8px, 2vw, 11px);
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            width: 100%;
+            max-width: 100vw;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             margin: 2px 0;
         }
         
-        .machine .date {
-            color: rgba(255, 255, 255, 0.85);
-            font-size: clamp(7px, 1.8vw, 10px);
+        /* ✅ MACHINE CARDS GRID — 4 per row */
+        .buttons-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: 1fr;
+            gap: 3px;
+            width: 100%;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* COMPACT Machine Card */
+        .btn {
+            padding: 3px 2px;
+            color: #fff;
+            border: 2px solid #000;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.15s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 0 2px var(--state, #888), 0 0 6px var(--state, #888);
+        }
+        
+        .btn.glow-high { background: linear-gradient(180deg, #16a34a, #15803d); }
+        .btn.glow-mid  { background: linear-gradient(180deg, #eab308, #a16207); }
+        .btn.glow-low  { background: linear-gradient(180deg, #dc2626, #991b1b); }
+        
+        .btn.on-state  { --state: #22ff22; }
+        .btn.off-state { --state: #ff2222; }
+        .btn.nosig-state { --state: #999; }
+        
+        .btn:hover, .btn:active {
+            transform: scale(0.95);
+            filter: brightness(1.15);
+        }
+        
+        .btn.selected {
+            outline: 2px solid #ff0;
+            outline-offset: 1px;
+        }
+        
+        /* Name + Status — SAME line */
+        .btn .name-status-line {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            width: 100%;
+            line-height: 1;
+        }
+        
+        .btn .machine-name {
+            color: #fff;
+            font-size: clamp(11px, 2.8vw, 16px);
+            font-weight: 900;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+            line-height: 1;
+        }
+        
+        .btn .status-badge {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 0 clamp(4px, 0.8vw, 7px);
+            font-size: clamp(8px, 1.9vw, 11px);
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-shadow: 0 0 4px currentColor;
+            line-height: 1.3;
+        }
+        
+        .btn.on-state  .status-badge { color: #22ff22; }
+        .btn.off-state .status-badge { color: #ff4444; }
+        .btn.nosig-state .status-badge { color: #ccc; }
+        
+        /* Time */
+        .btn .time-line {
+            color: #fff;
+            font-size: clamp(7px, 1.7vw, 9px);
+            font-weight: 600;
+            line-height: 1;
+            margin-top: 1px;
+        }
+        
+        /* Date | Shift */
+        .btn .date-line {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: clamp(6px, 1.5vw, 8px);
+            font-weight: 600;
+            font-style: italic;
+            line-height: 1;
+        }
+        
+        /* Separator */
+        .btn .separator {
+            width: 60%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.4);
             margin: 1px 0;
         }
         
-        /* ✅ Efficiency */
-        .efficiency-box {
-            width: 100%;
-            margin-top: clamp(3px, 1vw, 8px);
-            padding-top: clamp(3px, 1vw, 6px);
-            border-top: 1px solid rgba(255, 255, 255, 0.45);
-            text-align: center;
-        }
-        
-        .efficiency-label {
-            font-size: clamp(9px, 2vw, 12px);
+        /* Efficiency */
+        .btn .eff-line {
             color: #fff;
-            margin-bottom: 3px;
-            text-align: center;
+            font-size: clamp(9px, 2.2vw, 13px);
+            font-weight: 900;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+            line-height: 1;
         }
         
-        .efficiency-value {
-            font-size: clamp(15px, 3.4vw, 24px);
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+        .btn .eff-label {
+            font-size: clamp(7px, 1.6vw, 9px);
+            font-weight: 600;
+            opacity: 0.9;
+            margin-right: 1px;
         }
         
-        /* ON / OFF time of this shift in HH:MM (dark badge) */
-        .hours {
+        /* ON/OFF time badge */
+        .btn .hours-badge {
             display: inline-flex;
-            flex-wrap: wrap;
+            align-items: center;
             justify-content: center;
-            gap: 2px 8px;
-            margin-top: 3px;
-            padding: 2px 8px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 6px;
-            font-size: clamp(9px, 2.2vw, 14px);
+            gap: 2px;
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 8px;
+            padding: 0 4px;
+            font-size: clamp(6px, 1.5vw, 8px);
             font-weight: bold;
             font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            line-height: 1.2;
+            margin-top: 1px;
         }
         
-        .hours .h-on  { color: #0f0; }
-        .hours .h-off { color: #f66; }
+        .btn .hours-badge .h-on  { color: #22ff22; }
+        .btn .hours-badge .h-off { color: #ff6b6b; }
         
-        /* ✅ 12 Buttons in Horizontal Line */
-        .buttons-row {
+        /* ✅ BOTTOM SMALL BUTTONS — 6 per line */
+        .bottom-buttons {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: clamp(3px, 1vw, 8px);
+            gap: 3px;
             width: 100%;
-            max-width: min(95vw, 800px);
-            margin: clamp(8px, 2vh, 20px) auto;
+            max-width: 100vw;
+            padding: 3px 2px;
+            flex-shrink: 0;
+            margin-top: 2px;
         }
         
-        .btn {
-            padding: clamp(6px, 1.5vw, 12px) clamp(4px, 1vw, 10px);
-            font-size: clamp(10px, 2vw, 14px);
-            background: #0ff;
-            color: #000;
-            border: none;
-            border-radius: clamp(4px, 1vw, 8px);
-            cursor: pointer;
+        .small-btn {
+            padding: 3px 2px;
+            font-size: clamp(8px, 2vw, 11px);
             font-weight: bold;
-            transition: all 0.2s;
+            color: #fff;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
             text-align: center;
+            transition: all 0.15s;
+            line-height: 1.1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
-        .btn:hover, .btn:active {
-            background: #0aa;
+        .small-btn.on-state {
+            background: #16a34a;
+            border-color: #22ff22;
+            color: #fff;
+        }
+        
+        .small-btn.off-state {
+            background: #991b1b;
+            border-color: #ff4444;
+            color: #fff;
+        }
+        
+        .small-btn:hover, .small-btn:active {
             transform: scale(0.95);
+            filter: brightness(1.2);
         }
         
-        .btn.refresh {
-            background: #0f0;
-            color: #000;
-        }
-        
+        /* Last update */
         #lastUpdate {
             color: #888;
-            font-size: clamp(10px, 2vw, 14px);
-            margin: 10px 0;
+            font-size: clamp(6px, 1.5vw, 9px);
             text-align: center;
+            margin: 1px 0;
+            flex-shrink: 0;
         }
         
-        /* ✅ Mobile portrait (small phones) */
-        @media (max-width: 480px) {
-            .grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .buttons-row {
-                grid-template-columns: repeat(6, 1fr);
-            }
+        /* EXTRA SMALL SCREENS */
+        @media (max-width: 400px) {
+            h1 { font-size: 11px; margin: 1px 0; }
+            .status-bar { font-size: 10px; margin: 1px 0; }
+            .part-nav { margin: 1px 0; gap: 2px; }
+            .part-box { padding: 1px 8px; min-width: 60px; }
+            .part-name { font-size: 10px; }
+            .arrow-btn { font-size: 16px; padding: 0 4px; }
+            .btn .machine-name { font-size: 11px; }
+            .btn .status-badge { font-size: 8px; padding: 0 3px; }
+            .btn .time-line { font-size: 6px; }
+            .btn .date-line { font-size: 5px; }
+            .btn .eff-line { font-size: 9px; }
+            .btn .hours-badge { font-size: 5px; }
+            .small-btn { font-size: 7px; padding: 2px 1px; }
         }
         
-        /* ✅ Tablet */
-        @media (min-width: 481px) and (max-width: 768px) {
-            .grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            .buttons-row {
-                grid-template-columns: repeat(6, 1fr);
-            }
-        }
-        
-        /* ✅ Desktop */
-        @media (min-width: 769px) {
-            .grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            .buttons-row {
-                grid-template-columns: repeat(12, 1fr);
-            }
-        }
-        
-        /* ✅ Landscape mode */
+        /* Landscape */
         @media (orientation: landscape) and (max-height: 500px) {
-            body {
-                padding: 5px;
-            }
-            h1 {
-                font-size: 16px;
-                margin: 3px 0;
-            }
-            .status-bar {
-                font-size: 14px;
-                margin: 3px 0;
-            }
-            .machine {
-                min-height: 60px;
-            }
-        }
-        
-        /* ✅ Small Screen */
-        @media (max-width: 360px) {
-            .machine h2 {
-                font-size: 14px;
-            }
-            .machine .status {
-                font-size: 10px;
-            }
-            .machine .time {
-                font-size: 8px;
-            }
-        }
-        
-        /* ✅ Large Screen */
-        @media (min-width: 1200px) {
-            .grid {
-                max-width: 900px;
-            }
-            .buttons-row {
-                max-width: 900px;
-            }
+            h1 { font-size: 11px; margin: 1px 0; }
+            .status-bar { font-size: 10px; margin: 1px 0; }
+            .part-nav { margin: 1px 0; }
         }
     </style>
 </head>
@@ -292,29 +337,28 @@
         <span class="off">OFF: <span id="offCount">0</span></span>
     </div>
     
-    <div class="grid" id="machines">Loading...</div>
-    
-    <!-- ✅ 12 Buttons in Horizontal Line -->
-    <div class="buttons-row" id="buttonRow">
-        <button class="btn" onclick="filterMachine('M1')">M1</button>
-        <button class="btn" onclick="filterMachine('M2')">M2</button>
-        <button class="btn" onclick="filterMachine('M3')">M3</button>
-        <button class="btn" onclick="filterMachine('M4')">M4</button>
-        <button class="btn" onclick="filterMachine('M5')">M5</button>
-        <button class="btn" onclick="filterMachine('M6')">M6</button>
-        <button class="btn" onclick="filterMachine('M7')">M7</button>
-        <button class="btn" onclick="filterMachine('M8')">M8</button>
-        <button class="btn" onclick="filterMachine('M9')">M9</button>
-        <button class="btn" onclick="filterMachine('M10')">M10</button>
-        <button class="btn" onclick="filterMachine('M11')">M11</button>
-        <button class="btn refresh" onclick="fetchData()">↻</button>
+    <div class="part-nav">
+        <button class="arrow-btn" id="prevBtn" onclick="changePart(-1)">◀</button>
+        <div class="part-box">
+            <div class="part-name" id="partName">Part-1</div>
+        </div>
+        <button class="arrow-btn" id="nextBtn" onclick="changePart(1)">▶</button>
     </div>
+    
+    <div class="main-content">
+        <div class="buttons-row" id="buttonRow">Loading...</div>
+    </div>
+    
+    <div class="bottom-buttons" id="bottomButtons"></div>
     
     <p id="lastUpdate"></p>
 
     <script>
-        const URL = 'https://script.google.com/macros/s/AKfycbzoxw2VMo6dURaPEPrUzSrv9OpWC42dgwK4FTWe4NlLINI7T--9JlCJ0wjoqsbodx5k0A/exec';
+        const URL = 'https://script.google.com/macros/s/AKfycbxL2vRk-GKdOhaoY0OVokRMuUu2Fe_NAF4Y1BpxIBASAFpZDdbrTXgtvEXFnfFPAA1r/exec';
+        
         let allData = [];
+        let selectedMachine = '';
+        let currentPart = 1;
         
         function fetchData() {
             const callbackName = 'jsonpCb_' + Date.now();
@@ -323,7 +367,7 @@
                 allData = data;
                 renderData(data);
                 document.getElementById('lastUpdate').textContent =
-                    'Last Update: ' + new Date().toLocaleString('en-IN');
+                    'Last: ' + new Date().toLocaleTimeString('en-IN');
                 
                 delete window[callbackName];
                 if (script.parentNode) script.parentNode.removeChild(script);
@@ -334,23 +378,30 @@
             document.body.appendChild(script);
         }
         
-        // Minutes -> "HH:MM"
         function hhmm(min) {
             const m = Math.round(Number(min) || 0);
             return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
         }
         
-        let selectedMachine = '';
+        function getCurrentPartData() {
+            return allData.filter(m => {
+                const n = parseInt(String(m.machine || '').replace(/[^0-9]/g, ''));
+                if (currentPart === 1) return n >= 1 && n <= 12;
+                return n >= 13 && n <= 24;
+            }).sort((a, b) => {
+                const na = parseInt(String(a.machine).replace(/[^0-9]/g, ''));
+                const nb = parseInt(String(b.machine).replace(/[^0-9]/g, ''));
+                return na - nb;
+            });
+        }
         
-        // One machine tab: border + ON/OFF text = machine state, inner glow = efficiency
-        function machineCard(m) {
-            const status = String(m.status || '');
-            const cls = status === 'ON' ? 'on-state' : status === 'OFF' ? 'off-state' : 'nosig-state';
+        function renderMachineButton(m) {
+            const status = String(m.status || '--').toUpperCase();
+            const stateCls = status === 'ON' ? 'on-state' : status === 'OFF' ? 'off-state' : 'nosig-state';
             const eff = Number(m.efficiency) || 0;
-            const glow = eff >= 80 ? 'glow-high' : eff >= 50 ? 'glow-mid' : 'glow-low';
-            const sel = m.machine === selectedMachine ? ' selected' : '';
+            const glowCls = eff >= 80 ? 'glow-high' : eff >= 50 ? 'glow-mid' : 'glow-low';
+            const selCls = m.machine === selectedMachine ? ' selected' : '';
             
-            // ✅ DD/MM/YYYY format
             let dateStr = m.date || '';
             if (!dateStr && m.time) {
                 const today = new Date();
@@ -358,45 +409,91 @@
                           String(today.getMonth() + 1).padStart(2, '0') + '/' + today.getFullYear();
             }
             
-            return '<div class="machine ' + cls + ' ' + glow + sel + '">' +
-                '<h2>' + m.machine + '</h2>' +
-                '<div class="status">' + status + '</div>' +
-                '<div class="time">' + (m.time || '') + '</div>' +
-                '<div class="date">' + dateStr + (m.shift ? ' | Shift ' + m.shift : '') + '</div>' +
-                '<div class="efficiency-box">' +
-                    '<div class="efficiency-label">Eff: ' +
-                        '<span class="efficiency-value">' + eff + '%</span>' +
-                    '</div>' +
-                    '<div class="hours">' +
-                        '<span class="h-on">ON ' + hhmm(m.onTime) + '</span>' +
-                        '<span class="h-off">OFF ' + hhmm(m.offTime) + '</span>' +
-                    '</div>' +
+            const shift = m.shift || '-';
+            
+            return '<button class="btn ' + stateCls + ' ' + glowCls + selCls + '" ' +
+                   'onclick="filterMachine(\'' + m.machine + '\')">' +
+                '<div class="name-status-line">' +
+                    '<span class="machine-name">' + (m.machine || '?') + '</span>' +
+                    '<span class="status-badge">' + status + '</span>' +
                 '</div>' +
-            '</div>';
+                '<div class="time-line">' + (m.time || '--:--:--') + '</div>' +
+                '<div class="date-line">' + dateStr + ' | S-' + shift + '</div>' +
+                '<div class="separator"></div>' +
+                '<div class="eff-line">' +
+                    '<span class="eff-label">Eff:</span>' + eff + '%' +
+                '</div>' +
+                '<div class="hours-badge">' +
+                    '<span class="h-on">' + hhmm(m.onTime) + '</span>' +
+                    '<span class="h-off">' + hhmm(m.offTime) + '</span>' +
+                '</div>' +
+            '</button>';
+        }
+        
+        function renderBottomButtons(partData) {
+            const container = document.getElementById('bottomButtons');
+            
+            if (partData.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = partData.map(m => {
+                const status = String(m.status || '--').toUpperCase();
+                const stateCls = status === 'ON' ? 'on-state' : status === 'OFF' ? 'off-state' : '';
+                const sel = m.machine === selectedMachine ? 'selected' : '';
+                
+                return '<button class="small-btn ' + stateCls + ' ' + sel + '" ' +
+                       'onclick="filterMachine(\'' + m.machine + '\')">' +
+                       m.machine +
+                       '</button>';
+            }).join('');
         }
         
         function renderData(data) {
+            const partData = getCurrentPartData();
+            
             let on = 0, off = 0;
-            data.forEach(m => {
+            partData.forEach(m => {
                 if (m.status === 'ON') on++;
                 else off++;
             });
             
             document.getElementById('onCount').textContent = on;
             document.getElementById('offCount').textContent = off;
-            document.getElementById('machines').innerHTML = data.map(machineCard).join('');
+            
+            const container = document.getElementById('buttonRow');
+            if (partData.length === 0) {
+                container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#888;padding:20px;">No data</div>';
+            } else {
+                container.innerHTML = partData.map(renderMachineButton).join('');
+            }
+            
+            renderBottomButtons(partData);
+            
+            document.getElementById('partName').textContent = 'Part-' + currentPart;
+            document.getElementById('prevBtn').disabled = (currentPart === 1);
+            document.getElementById('nextBtn').disabled = (currentPart === 2);
         }
         
-        // Button: highlight that machine (press again to remove). Stays after auto refresh.
+        function changePart(direction) {
+            const newPart = currentPart + direction;
+            if (newPart < 1 || newPart > 2) return;
+            currentPart = newPart;
+            renderData(allData);
+        }
+        
         function filterMachine(machineName) {
             selectedMachine = selectedMachine === machineName ? '' : machineName;
             renderData(allData);
         }
         
-        // Initial load
-        fetchData();
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') changePart(-1);
+            if (e.key === 'ArrowRight') changePart(1);
+        });
         
-        // Auto refresh every 15 seconds
+        fetchData();
         setInterval(fetchData, 15000);
     </script>
 </body>
