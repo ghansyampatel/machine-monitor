@@ -30,12 +30,13 @@
         /* HEADER */
         h1 {
             color: #0ff;
-            font-size: clamp(30px, 10vw, 46px);
+            font-size: clamp(20px, 7vw, 30px);
             font-weight: 900;
             margin: 4px 0 2px;
             text-align: center;
             letter-spacing: 2px;
             flex-shrink: 0;
+            white-space: nowrap;
         }
 
         /* ON / OFF summary — shown as two 50:50 bordered boxes, below the Part nav */
@@ -109,35 +110,36 @@
             letter-spacing: 1px;
         }
 
-        /* MAIN CONTENT */
+        /* MAIN CONTENT — scrolls internally ONLY if the cards need more room
+           than the screen has (header/nav/status stay fixed on screen) */
         .main-content {
             flex: 1;
             width: 100%;
             max-width: 100vw;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             margin: 2px 0;
             padding: 0 8px;   /* keeps left/right cards clear of the screen edge */
             min-height: 0;
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* MACHINE CARDS — sized square by JS to always fit (3 x 4) without scrolling */
+        /* MACHINE CARDS — 3 per row, always square (CSS aspect-ratio), and
+           allowed to grow taller than square if their text ever needs more
+           room, instead of clipping it. */
         .buttons-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-content: center;
-            justify-content: center;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             width: 100%;
-            height: 100%;
-            overflow: hidden;
+            align-content: start;
+            padding-bottom: 6px;
         }
 
         /* Machine Card - square */
         .btn {
-            --card-size: 100px; /* overwritten inline by JS per card */
+            width: 100%;
+            aspect-ratio: 1 / 1;
             padding: 4px;
             color: #fff;
             border: 2px solid #000;
@@ -150,10 +152,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-evenly;
-            overflow: hidden;
+            overflow: visible;  /* never hide/clip data - card grows instead */
             position: relative;
             box-shadow: 0 0 0 2px var(--state, #888), 0 0 8px var(--state, #888);
-            /* width/height are set inline by JS to keep the card perfectly square */
         }
 
         .btn.glow-high { background: linear-gradient(180deg, #16a34a, #15803d); }
@@ -187,7 +188,7 @@
 
         .btn .machine-name {
             color: #fff;
-            font-size: calc(var(--card-size) * 0.17);
+            font-size: clamp(12px, 4.3vw, 17px);
             font-weight: 900;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
             line-height: 1;
@@ -197,8 +198,8 @@
             display: inline-block;
             background: rgba(0, 0, 0, 0.8);
             border-radius: 20px;
-            padding: calc(var(--card-size) * 0.015) calc(var(--card-size) * 0.05);
-            font-size: calc(var(--card-size) * 0.17);
+            padding: 1px 6px;
+            font-size: clamp(12px, 4.3vw, 17px);
             font-weight: 900;
             letter-spacing: 1px;
             text-shadow: 0 0 4px currentColor;
@@ -212,9 +213,9 @@
         /* LINE 2: Date + Time + Shift, all together */
         .btn .datetime-line {
             color: rgba(255, 255, 255, 0.9);
-            font-size: calc(var(--card-size) * 0.115);
+            font-size: clamp(8px, 2.7vw, 11px);
             font-weight: 600;
-            line-height: 1.1;
+            line-height: 1.15;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -234,7 +235,7 @@
         /* LINE 3 (bottom): Efficiency in the middle */
         .btn .eff-line {
             color: #fff;
-            font-size: calc(var(--card-size) * 0.16);
+            font-size: clamp(11px, 3.8vw, 15px);
             font-weight: 900;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
             line-height: 1;
@@ -242,7 +243,7 @@
         }
 
         .btn .eff-label {
-            font-size: calc(var(--card-size) * 0.09);
+            font-size: clamp(7px, 2.2vw, 9px);
             font-weight: 600;
             opacity: 0.9;
             margin-right: 2px;
@@ -254,15 +255,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: calc(var(--card-size) * 0.02);
+            gap: 1px;
             background: rgba(0, 0, 0, 0.75);
             border-radius: 8px;
-            padding: calc(var(--card-size) * 0.03) calc(var(--card-size) * 0.06);
-            font-size: calc(var(--card-size) * 0.11);
+            padding: 2px 6px;
+            font-size: clamp(8px, 2.6vw, 11px);
             font-weight: bold;
             font-variant-numeric: tabular-nums;
             white-space: nowrap;
-            line-height: 1.3;
+            line-height: 1.25;
             margin-top: 1px;
             flex-shrink: 0;
         }
@@ -281,7 +282,7 @@
 
         /* EXTRA SMALL SCREENS */
         @media (max-width: 400px) {
-            h1 { font-size: 30px; margin: 3px 0 1px; letter-spacing: 1px; }
+            h1 { font-size: 20px; margin: 3px 0 1px; letter-spacing: 1px; }
             .stat-box { font-size: 26px; padding: 6px 8px; }
             .part-nav { margin: 2px 0; gap: 8px; }
             .part-box { padding: 4px 20px; min-width: 130px; }
@@ -291,7 +292,7 @@
 
         /* Landscape */
         @media (orientation: landscape) and (max-height: 500px) {
-            h1 { font-size: 24px; margin: 2px 0; }
+            h1 { font-size: 18px; margin: 2px 0; }
             .stat-box { font-size: 20px; padding: 4px 10px; }
             .part-nav { margin: 1px 0; }
         }
@@ -322,10 +323,6 @@
 
     <script>
         const URL = 'https://script.google.com/macros/s/AKfycbxL2vRk-GKdOhaoY0OVokRMuUu2Fe_NAF4Y1BpxIBASAFpZDdbrTXgtvEXFnfFPAA1r/exec';
-
-        const COLS = 3;   // machines per row
-        const ROWS = 4;   // 12 machines per part = 3 x 4
-        const GAP = 10;   // must match CSS .buttons-row gap (px)
 
         let allData = [];
         let selectedMachine = '';
@@ -405,28 +402,6 @@
             '</button>';
         }
 
-        // Sizes every .btn card as a perfect square that always fits the
-        // available space (3 columns x 4 rows) with no page scrolling,
-        // and drives every font size inside it via --card-size.
-        function applySquareSizing() {
-            const row = document.getElementById('buttonRow');
-            const cards = row.querySelectorAll('.btn');
-            if (cards.length === 0) return;
-
-            const availW = row.clientWidth;
-            const availH = row.clientHeight;
-
-            const cellW = (availW - GAP * (COLS - 1)) / COLS;
-            const cellH = (availH - GAP * (ROWS - 1)) / ROWS;
-            const size = Math.floor(Math.max(0, Math.min(cellW, cellH)));
-
-            cards.forEach(btn => {
-                btn.style.width = size + 'px';
-                btn.style.height = size + 'px';
-                btn.style.setProperty('--card-size', size + 'px');
-            });
-        }
-
         function renderData(data) {
             const partData = getCurrentPartData();
 
@@ -449,8 +424,6 @@
             document.getElementById('partName').textContent = 'Part-' + currentPart;
             document.getElementById('prevBtn').disabled = (currentPart === 1);
             document.getElementById('nextBtn').disabled = (currentPart === 2);
-
-            requestAnimationFrame(applySquareSizing);
         }
 
         function changePart(direction) {
@@ -469,9 +442,6 @@
             if (e.key === 'ArrowLeft') changePart(-1);
             if (e.key === 'ArrowRight') changePart(1);
         });
-
-        window.addEventListener('resize', applySquareSizing);
-        window.addEventListener('orientationchange', applySquareSizing);
 
         fetchData();
         setInterval(fetchData, 15000);
