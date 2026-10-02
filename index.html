@@ -374,6 +374,12 @@
     <script>
         const URL = 'https://script.google.com/macros/s/AKfycbxL2vRk-GKdOhaoY0OVokRMuUu2Fe_NAF4Y1BpxIBASAFpZDdbrTXgtvEXFnfFPAA1r/exec';
 
+        // Each Part = one node = 12 machines.
+        // Part-1 = M1-M12 (node 1), Part-2 = M13-M24 (node 2),
+        // Part-3 = M25-M36 (node 3), Part-4 = M37-M48 (node 4)
+        const MACHINES_PER_PART = 12;
+        const TOTAL_PARTS = 4;
+
         let allData = [];
         let selectedMachine = '';
         let currentPart = 1;
@@ -424,16 +430,17 @@
             return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
         }
 
+        function machineNum(m) {
+            return parseInt(String(m.machine || '').replace(/[^0-9]/g, ''));
+        }
+
         function getCurrentPartData() {
+            const first = (currentPart - 1) * MACHINES_PER_PART + 1;
+            const last = currentPart * MACHINES_PER_PART;
             return allData.filter(m => {
-                const n = parseInt(String(m.machine || '').replace(/[^0-9]/g, ''));
-                if (currentPart === 1) return n >= 1 && n <= 12;
-                return n >= 13 && n <= 24;
-            }).sort((a, b) => {
-                const na = parseInt(String(a.machine).replace(/[^0-9]/g, ''));
-                const nb = parseInt(String(b.machine).replace(/[^0-9]/g, ''));
-                return na - nb;
-            });
+                const n = machineNum(m);
+                return n >= first && n <= last;
+            }).sort((a, b) => machineNum(a) - machineNum(b));
         }
 
         function renderMachineButton(m) {
@@ -496,12 +503,12 @@
 
             document.getElementById('partName').textContent = 'Part-' + currentPart;
             document.getElementById('prevBtn').disabled = (currentPart === 1);
-            document.getElementById('nextBtn').disabled = (currentPart === 2);
+            document.getElementById('nextBtn').disabled = (currentPart === TOTAL_PARTS);
         }
 
         function changePart(direction) {
             const newPart = currentPart + direction;
-            if (newPart < 1 || newPart > 2) return;
+            if (newPart < 1 || newPart > TOTAL_PARTS) return;
             currentPart = newPart;
             renderData(allData);
         }
